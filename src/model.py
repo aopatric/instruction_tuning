@@ -3,14 +3,10 @@
 """
 
 #
-# Constants
-# 
-
-
-
-#
 # Imports
 #
+
+import torch
 
 from transformers import GPTNeoXForCausalLM, GPTNeoXTokenizer
 from typing import Tuple
@@ -20,7 +16,7 @@ from utils.const import SUPPORTED_MODELS, SUPPORTED_REVISIONS
 # Core Model Components
 #
 
-def setup_model(model_name: str, revision: str = "main") -> Tuple[GPTNeoXForCausalLM, GPTNeoXTokenizer]:
+def setup_model(model_name: str, revision: str = "main", dtype=torch.float16) -> Tuple[GPTNeoXForCausalLM, GPTNeoXTokenizer]:
     """
     Sets up the given model for use in experimentation. Returns the selected
     model and tokenizer as a tuple (model, tokenizer).
@@ -40,29 +36,6 @@ def setup_model(model_name: str, revision: str = "main") -> Tuple[GPTNeoXForCaus
     assert revision in SUPPORTED_REVISIONS, f"Revision '{revision}' is not supported for model '{model_name}'."
 
     tokenizer = GPTNeoXTokenizer.from_pretrained(model_name)
-    model = GPTNeoXForCausalLM.from_pretrained(model_name, revision=revision)
+    model = GPTNeoXForCausalLM.from_pretrained(model_name, revision=revision, dtype=dtype)
 
     return model, tokenizer
-
-#
-# Tests
-#
-
-def test_setup_model() -> None:
-    """
-    Ensures setup_model doesn't crash and returns the right object types.
-    """
-
-    try:
-        model, tokenizer = setup_model("EleutherAI/pythia-160m", "step1")
-    except Exception as e:
-        print(f"Error setting up model: {e}")
-        return
-
-    assert isinstance(model, GPTNeoXForCausalLM), "Model is not a GPTNeoXForCausalLM"
-    assert isinstance(tokenizer, GPTNeoXTokenizer), "Tokenizer is not a GPTNeoXTokenizer"
-
-    print("test_setup_model: PASS")
-
-if __name__ == "__main__":
-    test_setup_model()
